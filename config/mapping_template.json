@@ -1,0 +1,16 @@
+{
+  "mapping_version": "mapping_001",
+  "mappings": {
+    "coverage": "20 مقدار ثبت شده",
+    "damage_type": "6 مقدار ثبت شده",
+    "event_type": [],
+    "insured_item_type": [],
+    "financial_damage_type": [],
+    "structure_type": [],
+    "risk_density": [],
+    "ownership_type": [],
+    "property_type": [],
+    "province": [],
+    "city": []
+  }
+}

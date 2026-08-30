@@ -1,0 +1,173 @@
+services:
+
+  # ============================================================
+  # TRAINING DATABASE
+  # ============================================================
+  postgres:
+    image: postgres:16
+    container_name: damage_ai_postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-damage_ai}
+      POSTGRES_USER: ${POSTGRES_USER:-damage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-damage_dev}
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - infrastructure_damage_ai_pgdata:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-damage} -d ${POSTGRES_DB:-damage_ai}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+  # ============================================================
+  # PREDICTION DATABASE
+  # ============================================================
+  prediction_db:
+    image: postgres:16
+    container_name: damage_prediction_db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${PREDICTION_POSTGRES_DB:-damage_prediction_db}
+      POSTGRES_USER: ${POSTGRES_USER:-damage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-damage_dev}
+
+    ports:
+      - "5434:5432"
+
+    volumes:
+      - prediction_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-damage} -d ${PREDICTION_POSTGRES_DB:-damage_prediction_db}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+  # ============================================================
+  # DATA PREPARATION
+  # ============================================================
+  preparation:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.base
+
+    container_name: damage_ai_preparation
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-damage}:${POSTGRES_PASSWORD:-damage_dev}@postgres:5432/${POSTGRES_DB:-damage_ai}
+
+    volumes:
+      - ../services/data_preparation:/app
+      - ../data:/data
+
+    working_dir: /app
+
+
+  # ============================================================
+  # ML TRAINING
+  # ============================================================
+  training:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.base
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+
+      # اسکریپت train_modelnoaddinsuretyp.py از این استفاده می‌کند
+      DB_URL: postgresql+psycopg://${POSTGRES_USER:-damage}:${POSTGRES_PASSWORD:-damage_dev}@postgres:5432/${POSTGRES_DB:-damage_ai}
+
+      # برای سازگاری با سایر اسکریپت‌های Training
+      TRAINING_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-damage}:${POSTGRES_PASSWORD:-damage_dev}@postgres:5432/${POSTGRES_DB:-damage_ai}
+
+      POSTGRES_DB: ${POSTGRES_DB:-damage_ai}
+      POSTGRES_USER: ${POSTGRES_USER:-damage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-damage_dev}
+
+    volumes:
+      - ../services/ml_training:/app
+      - ../data:/data
+      - ../models:/models
+
+    working_dir: /app
+
+
+  # ============================================================
+  # PREDICTION SERVICE
+  # ============================================================
+  prediction:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.base
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      prediction_db:
+        condition: service_healthy
+
+    environment:
+
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-damage}:${POSTGRES_PASSWORD:-damage_dev}@postgres:5432/${POSTGRES_DB:-damage_ai}
+
+      PREDICTION_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-damage}:${POSTGRES_PASSWORD:-damage_dev}@prediction_db:5432/${PREDICTION_POSTGRES_DB:-damage_prediction_db}
+
+      POSTGRES_DB: ${POSTGRES_DB:-damage_ai}
+      POSTGRES_USER: ${POSTGRES_USER:-damage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-damage_dev}
+
+    volumes:
+      
+      - ../services/prediction_service:/app
+      - ../services/ml_training/models:/models
+
+    working_dir: /app
+
+    ports:
+      - "8000:8000"
+
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+
+
+# ============================================================
+# VOLUMES
+# ============================================================
+volumes:
+
+  # Volume قدیمی و اصلی دیتابیس Training
+  infrastructure_damage_ai_pgdata:
+    external: true
+
+  # دیتابیس Prediction
+  prediction_postgres_data:

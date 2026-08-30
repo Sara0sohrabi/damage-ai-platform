@@ -1,0 +1,29 @@
+{
+  "province_code": "1",
+  "city_code": "101",
+  "coverage_code": "1",
+  "event_type_code": "1",
+  "loss_location_code": "1",
+  "occupation_code": "1",
+  "occupation_group_code": "1",
+  "damaged_item_code": "1",
+  "damage_type_code": "2",
+  "financial_damage_type_code": "1",
+  "structure_type_code": "1",
+  "risk_density_code": "2",
+  "ownership_type_code": "1",
+  "property_type_code": "1",
+  "premium": 25000000,
+  "item_sum_insured": 2000000000,
+  "total_sum_insured": 5000000000,
+  "estimate_amount": 850000000,
+  "customer_description": "خسارت ناشی از آتش سوزی به ساختمان و اثاثه",
+  "expert_report_text": "گزارش اولیه کارشناس خسارت...",
+  "invoice_items": [
+    {"item_name":"تعمیر پنجره","quantity":2,"unit_price":15000000,"total_price":30000000}
+  ],
+  "evidence": [
+    {"evidence_type":"image","file_name":"damage_01.jpg","storage_key":"claims/2026/08/damage_01.jpg","content_type":"image/jpeg","metadata":{"source":"mobile"}},
+    {"evidence_type":"invoice","file_name":"invoice_01.pdf","storage_key":"claims/2026/08/invoice_01.pdf","content_type":"application/pdf"}
+  ]
+}
