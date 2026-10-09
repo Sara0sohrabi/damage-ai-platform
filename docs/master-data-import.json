@@ -1,0 +1,120 @@
+{
+  "applied": true,
+  "source": "damage_ai",
+  "target": "damage_prediction_db",
+  "backup": "backups/master-data-20261004T120923Z.json",
+  "counts": {
+    "coverage": 20,
+    "event_type": 2,
+    "insured_item": 98,
+    "damage_type": 5,
+    "financial_damage_type": 4,
+    "occupation_group": 13,
+    "loss_location": 965,
+    "structure_type": 6,
+    "risk_density": 4,
+    "ownership_type": 2,
+    "property_type": 2,
+    "province": 32,
+    "city": 145,
+    "occupation": 210,
+    "insurance_type": 3,
+    "insured_item_type": 2
+  },
+  "conflicts": [
+    {
+      "table": "coverage",
+      "code": "2",
+      "titles": [
+        "آتش سوزی، صاعقه و انفجار",
+        "زلزله و آتشفشان"
+      ]
+    },
+    {
+      "table": "coverage",
+      "code": "3",
+      "titles": [
+        "آتش سوزی، صاعقه و انفجار",
+        "زلزله و آتشفشان",
+        "سیل و طغیان آب"
+      ]
+    },
+    {
+      "table": "coverage",
+      "code": "4",
+      "titles": [
+        "آتش سوزی، صاعقه و انفجار",
+        "زلزله و آتشفشان",
+        "طوفان، گردباد و تندباد"
+      ]
+    },
+    {
+      "table": "coverage",
+      "code": "5",
+      "titles": [
+        "ترکیدگی لوله آب و فاضلاب",
+        "زلزله و آتشفشان"
+      ]
+    },
+    {
+      "table": "coverage",
+      "code": "6",
+      "titles": [
+        "زلزله و آتشفشان",
+        "ضایعات آب برف و باران"
+      ]
+    },
+    {
+      "table": "coverage",
+      "code": "7",
+      "titles": [
+        "زلزله و آتشفشان",
+        "سقوط هواپیما یا هلیکوپتر و قطعات آنها",
+        "ضایعات آب برف و باران"
+      ]
+    },
+    {
+      "table": "coverage",
+      "code": "8",
+      "titles": [
+        "سقوط اجسام خارجی",
+        "ضایعات آب برف و باران"
+      ]
+    },
+    {
+      "table": "coverage",
+      "code": "9",
+      "titles": [
+        "ضایعات آب برف و باران",
+        "پاکسازی و برداشت ضایعات"
+      ]
+    },
+    {
+      "table": "damage_type",
+      "code": "1",
+      "titles": [
+        "تخریب",
+        "جانی",
+        "مالی"
+      ]
+    }
+  ],
+  "review_counts": {
+    "coverage": 8,
+    "event_type": 0,
+    "insured_item": 1,
+    "damage_type": 1,
+    "financial_damage_type": 0,
+    "occupation_group": 0,
+    "loss_location": 1,
+    "structure_type": 1,
+    "risk_density": 1,
+    "ownership_type": 2,
+    "property_type": 2,
+    "province": 0,
+    "city": 0,
+    "occupation": 169,
+    "insurance_type": 0,
+    "insured_item_type": 2
+  }
+}
