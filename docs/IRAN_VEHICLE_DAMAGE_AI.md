@@ -62,3 +62,14 @@ The development target is the user's Apple Silicon M5 Mac. Use PyTorch MPS when 
 - Model detections are decision support, not a final claim decision.
 - Keep model version, dataset version, confidence, source media and expert edits auditable.
 - Do not use the existing property/fire loss model to estimate motor repair costs.
+
+
+## Implemented in branch 0.2
+
+- Claim-linked image evidence upload with MIME, image-decode and size validation.
+- Persistent metadata and inference results in dedicated `vehicle_claim_media`, `vehicle_vision_analyses` and `vehicle_assessment_reviews` tables.
+- Claim result retrieval and expert-entered repair operation assessment with deterministic IRR totals.
+- Standalone Docker service on port 8010; its database shares the existing PostgreSQL service but its tables are isolated.
+- Local SQLite fallback for development.
+
+The media filesystem volume is suitable for local development only. Production deployment still needs authentication/authorization, private object storage, retention controls, malware scanning, audit identity integration and a reviewed price catalogue. No trained model weights or real repair-cost model are included yet.
