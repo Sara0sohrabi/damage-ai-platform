@@ -1,0 +1,28 @@
+# YOLO detection dataset. Replace path with your labeled dataset root.
+path: ./data/vehicle_vision/dataset
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: front_bumper
+  1: rear_bumper
+  2: hood
+  3: trunk
+  4: roof
+  5: windshield
+  6: front_left_door
+  7: front_right_door
+  8: rear_left_door
+  9: rear_right_door
+  10: fender
+  11: headlight
+  12: taillight
+  13: side_mirror
+  14: wheel
+  15: scratch
+  16: dent
+  17: crack
+  18: broken_glass
+  19: deformation
+  20: missing_part
