@@ -1,0 +1,25 @@
+name: Vehicle Vision Tests
+
+on:
+  push:
+    branches: [feature/iran-vehicle-damage-ai]
+    paths:
+      - "services/vehicle_vision/**"
+      - ".github/workflows/vehicle-vision-tests.yml"
+  pull_request:
+    paths:
+      - "services/vehicle_vision/**"
+      - ".github/workflows/vehicle-vision-tests.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: services/vehicle_vision/requirements-dev.txt
+      - run: pip install -r services/vehicle_vision/requirements-dev.txt
+      - run: pytest -q services/vehicle_vision/tests
