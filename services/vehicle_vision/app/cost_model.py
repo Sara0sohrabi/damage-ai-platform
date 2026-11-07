@@ -8,7 +8,7 @@ from typing import Any
 import joblib
 import pandas as pd
 
-MODEL_PATH = Path(os.getenv("VEHICLE_REPAIR_COST_MODEL", "models/vehicle_repair_cost.joblib"))
+MODEL_PATH = Path(os.getenv("VEHICLE_REPAIR_COST_MODEL", "models/vehicle_vision/vehicle_repair_cost.joblib"))
 
 
 class CostModelNotConfigured(RuntimeError):
