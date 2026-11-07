@@ -22,4 +22,4 @@ jobs:
           cache: pip
           cache-dependency-path: services/vehicle_vision/requirements-dev.txt
       - run: pip install -r services/vehicle_vision/requirements-dev.txt
-      - run: pytest -q services/vehicle_vision/tests
+      - run: python -m pytest -q services/vehicle_vision/tests
