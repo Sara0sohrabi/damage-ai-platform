@@ -4,3 +4,5 @@ python-multipart>=0.0.9
 pillow>=10.0
 ultralytics>=8.3,<9.0
 torch>=2.4
+sqlalchemy>=2.0,<3.0
+psycopg[binary]>=3.2,<4.0
