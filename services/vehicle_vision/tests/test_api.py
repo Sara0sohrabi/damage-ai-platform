@@ -26,3 +26,16 @@ def test_assessment_totals_expert_entered_items():
     assert response.status_code == 200
     assert response.json()["total_estimate_irr"] == 3500
     assert response.json()["approved"] is False
+
+
+def test_cost_estimate_is_unavailable_without_trained_artifact():
+    client = TestClient(app)
+    response = client.post(
+        "/api/v1/vehicle/repair-cost/estimate",
+        json={
+            "make": "Saipa", "model": "Tiba", "year": 1398, "city": "Tehran",
+            "part": "front_bumper", "damage_type": "dent", "severity": "moderate",
+            "affected_area_pct": 20, "labor_hours": 3,
+        },
+    )
+    assert response.status_code == 503
