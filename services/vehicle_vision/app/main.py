@@ -10,7 +10,8 @@ from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field
 
 from .inference import ModelNotConfigured, VehicleVisionModel
-from .persistence import create_assessment, create_media, get_claim_results, initialize_database, save_analysis\nfrom .cost_model import CostModelNotConfigured, predict_repair_cost
+from .persistence import create_assessment, create_media, get_claim_results, initialize_database, save_analysis
+from .cost_model import CostModelNotConfigured, predict_repair_cost
 
 MAX_IMAGE_BYTES = int(os.getenv("VEHICLE_VISION_MAX_IMAGE_BYTES", str(12 * 1024 * 1024)))
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
@@ -81,7 +82,7 @@ def _run_inference(image: Image.Image) -> list[dict]:
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok", "service": "vehicle-vision", "model_configured": vision_model.ready,
-            "device": vision_model._device, "model_path": str(vision_model.model_path)}
+            "device": vision_model._device, "model_path": str(vision_model.model_path), "cost_model_configured": Path(os.getenv("VEHICLE_REPAIR_COST_MODEL", "models/vehicle_vision/vehicle_repair_cost.joblib")).is_file()}
 
 
 @app.post("/api/v1/vehicle/vision/analyze")
