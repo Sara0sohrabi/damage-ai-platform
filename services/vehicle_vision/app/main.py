@@ -49,10 +49,10 @@ async def analyze_vehicle_image(file: UploadFile = File(...)) -> dict:
         )
 
     try:
+        probe = Image.open(io.BytesIO(content))
+        probe.verify()
         image = Image.open(io.BytesIO(content)).convert("RGB")
-        image.verify()
-        image = Image.open(io.BytesIO(content)).convert("RGB")
-    except (UnidentifiedImageError, OSError):
+    except (UnidentifiedImageError, OSError, RuntimeError):
         raise HTTPException(status_code=400, detail={"code": "INVALID_IMAGE"})
 
     analysis_id = str(uuid4())
