@@ -10,7 +10,7 @@ from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field
 
 from .inference import ModelNotConfigured, VehicleVisionModel
-from .persistence import create_assessment, create_media, get_claim_results, initialize_database, save_analysis
+from .persistence import create_assessment, create_media, get_claim_results, initialize_database, save_analysis\nfrom .cost_model import CostModelNotConfigured, predict_repair_cost
 
 MAX_IMAGE_BYTES = int(os.getenv("VEHICLE_VISION_MAX_IMAGE_BYTES", str(12 * 1024 * 1024)))
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
@@ -31,6 +31,18 @@ class AssessmentItem(BaseModel):
     title: str = Field(min_length=1, max_length=250)
     quantity: float = Field(default=1, gt=0)
     unit_price_irr: int = Field(ge=0)
+
+
+class CostEstimateRequest(BaseModel):
+    make: str = Field(min_length=1, max_length=100)
+    model: str = Field(min_length=1, max_length=100)
+    year: int = Field(ge=1950, le=2100)
+    city: str = Field(min_length=1, max_length=100)
+    part: str = Field(min_length=1, max_length=100)
+    damage_type: str = Field(min_length=1, max_length=100)
+    severity: str = Field(min_length=1, max_length=50)
+    affected_area_pct: float = Field(ge=0, le=100)
+    labor_hours: float = Field(ge=0, le=1000)
 
 
 class AssessmentRequest(BaseModel):
@@ -142,3 +154,20 @@ def review_claim_assessment(claim_id: str, request: AssessmentRequest) -> dict:
             "total_estimate_irr": total, "currency": "IRR", "approved": request.approved,
             "reviewer": request.reviewer,
             "notice": "Estimate uses expert-entered prices; it is not an automated market-price prediction."}
+
+
+@app.post("/api/v1/vehicle/repair-cost/estimate")
+def estimate_vehicle_repair_cost(request: CostEstimateRequest) -> dict:
+    try:
+        result = predict_repair_cost(request.model_dump())
+    except CostModelNotConfigured as exc:
+        raise HTTPException(status_code=503, detail={"code": "COST_MODEL_NOT_CONFIGURED", "message": str(exc)})
+    except Exception:
+        raise HTTPException(status_code=500, detail={"code": "COST_MODEL_INFERENCE_FAILED"})
+    return {
+        "success": True,
+        **result,
+        "currency": "IRR",
+        "review_required": True,
+        "notice": "Indicative model estimate only; final amount requires expert approval.",
+    }
