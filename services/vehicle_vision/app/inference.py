@@ -18,7 +18,7 @@ class ModelNotConfigured(RuntimeError):
 class VehicleVisionModel:
     def __init__(self) -> None:
         self.model_path = Path(
-            os.getenv("VEHICLE_VISION_MODEL", "models/vehicle_damage_yolo.pt")
+            os.getenv("VEHICLE_VISION_MODEL", "models/vehicle_vision/vehicle_damage_yolo.pt")
         )
         self.confidence = float(os.getenv("VEHICLE_VISION_CONFIDENCE", "0.25"))
         self._model: Any | None = None
