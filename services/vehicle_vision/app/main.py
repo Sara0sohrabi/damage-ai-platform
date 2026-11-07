@@ -172,3 +172,53 @@ def estimate_vehicle_repair_cost(request: CostEstimateRequest) -> dict:
         "review_required": True,
         "notice": "Indicative model estimate only; final amount requires expert approval.",
     }
+
+
+# Claim workflow, management dashboard and explainable fraud screening.
+from .workflow import create_claim_record, get_claim_record, list_claim_records, dashboard_summary, screen_claim
+
+class ClaimCreate(BaseModel):
+    claim_id: str = Field(min_length=3, max_length=160)
+    policy_number: str = Field(min_length=2, max_length=100)
+    plate_number: str = Field(min_length=5, max_length=30)
+    make: str = Field(min_length=1, max_length=100)
+    model: str = Field(min_length=1, max_length=100)
+    year: int = Field(ge=1300, le=2100)
+    accident_date: str = Field(min_length=8, max_length=30)
+    city: str = Field(min_length=1, max_length=100)
+    claimed_amount_irr: int = Field(default=0, ge=0)
+    claimant_name: str | None = Field(default=None, max_length=150)
+
+@app.post("/api/v1/claims", status_code=201)
+def register_claim(request: ClaimCreate):
+    try:
+        create_claim_record(**request.model_dump())
+    except Exception as exc:
+        if "unique" in str(exc).lower():
+            raise HTTPException(status_code=409, detail={"code":"CLAIM_ALREADY_EXISTS"})
+        raise
+    return {"success":True,"claim":get_claim_record(request.claim_id)}
+
+@app.get("/api/v1/claims")
+def claims_list(status: str | None = None, limit: int = 100, offset: int = 0):
+    if limit < 1 or limit > 500 or offset < 0:
+        raise HTTPException(status_code=422, detail={"code":"INVALID_PAGINATION"})
+    return {"items":list_claim_records(status=status,limit=limit,offset=offset),
+            "limit":limit,"offset":offset}
+
+@app.get("/api/v1/claims/{claim_id}")
+def claim_detail(claim_id: str):
+    record=get_claim_record(claim_id)
+    if not record: raise HTTPException(status_code=404,detail={"code":"CLAIM_NOT_FOUND"})
+    return {"claim":record}
+
+@app.get("/api/v1/admin/dashboard")
+def admin_dashboard():
+    return dashboard_summary()
+
+@app.get("/api/v1/claims/{claim_id}/fraud-screening")
+def claim_fraud_screening(claim_id: str):
+    claim=get_claim_record(claim_id)
+    if not claim: raise HTTPException(status_code=404,detail={"code":"CLAIM_NOT_FOUND"})
+    return {"claim_id":claim_id,**screen_claim(claim),
+            "notice":"Rule-based screening only. Alerts are not proof of fraud and must not trigger automatic claim rejection."}
