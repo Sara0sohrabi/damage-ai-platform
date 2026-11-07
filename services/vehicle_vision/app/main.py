@@ -36,7 +36,7 @@ class AssessmentItem(BaseModel):
 class CostEstimateRequest(BaseModel):
     make: str = Field(min_length=1, max_length=100)
     model: str = Field(min_length=1, max_length=100)
-    year: int = Field(ge=1950, le=2100)
+    year: int = Field(ge=1300, le=2100)
     city: str = Field(min_length=1, max_length=100)
     part: str = Field(min_length=1, max_length=100)
     damage_type: str = Field(min_length=1, max_length=100)
