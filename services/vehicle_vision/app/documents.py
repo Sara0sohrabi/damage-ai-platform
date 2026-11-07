@@ -142,3 +142,58 @@ def list_documents(claim_id: str):
                       "extracted_fields":json.loads(r["extracted_json"]),
                       "confirmed_fields":json.loads(r["confirmed_json"]) if r["confirmed_json"] else None,
                       "review_status":r["review_status"]} for r in rows]}
+
+# Minimal document intake page. API key is kept only in page memory (not persisted).
+from fastapi.responses import HTMLResponse
+
+@router.get("/documents/intake", response_class=HTMLResponse, include_in_schema=False)
+def intake_page():
+    return HTMLResponse("""<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8">
+<title>مدارک پرونده خسارت خودرو</title><style>
+body{font:15px Tahoma,sans-serif;background:#f5f6f8;color:#20242a;max-width:750px;margin:35px auto;padding:16px}
+section{background:white;padding:22px;border-radius:12px;border:1px solid #ddd}
+label{display:block;margin-top:16px}input,select,textarea{width:100%;padding:10px;box-sizing:border-box;margin-top:6px}
+button{padding:12px 22px;background:#222;color:white;border:0;border-radius:8px;margin-top:16px;cursor:pointer}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eee;padding:12px}
+</style><section><h2>ثبت تصویر مدارک و خودرو</h2>
+<p>پس از ثبت پرونده، شناسه آن را وارد کنید. OCR نیازمند بررسی و تأیید انسانی است.</p>
+<label>شناسه پرونده<input id="claim" required></label>
+<label>کلید دسترسی مدارک<input id="key" type="password" autocomplete="off" required></label>
+<label>نوع تصویر<select id="kind"><option value="national_card">کارت ملی</option>
+<option value="driver_license">گواهینامه</option><option value="vehicle_card">کارت خودرو</option>
+<option value="vehicle_front">نمای جلو خودرو</option><option value="vehicle_rear">نمای عقب خودرو</option>
+<option value="vehicle_left">نمای چپ خودرو</option><option value="vehicle_right">نمای راست خودرو</option></select></label>
+<label>عکس<input id="file" type="file" accept="image/jpeg,image/png,image/webp"></label>
+<button onclick="upload()">بارگذاری و استخراج</button><p id="status"></p>
+<label>اطلاعات پیشنهادی OCR (قابل اصلاح)<textarea id="fields" rows="7">{}</textarea></label>
+<button onclick="review()">ثبت اطلاعات تأییدشده</button><pre id="result"></pre></section>
+<script>
+let current=null;
+const el=id=>document.getElementById(id);
+async function upload(){
+  const claim=el('claim').value.trim(), file=el('file').files[0];
+  if(!claim||!file){el('status').textContent='شناسه پرونده و عکس الزامی است';return}
+  let form=new FormData();form.append('kind',el('kind').value);form.append('file',file);
+  try{
+    const r=await fetch('/api/v1/claims/'+encodeURIComponent(claim)+'/documents',
+      {method:'POST',headers:{'X-Document-Api-Key':el('key').value},body:form});
+    const j=await r.json();if(!r.ok)throw Error(JSON.stringify(j.detail));
+    current=j.document_id;el('fields').value=JSON.stringify(j.extracted_fields,null,2);
+    el('status').textContent='تصویر ثبت شد؛ اطلاعات را بررسی و سپس تأیید کنید. OCR: '+j.ocr_provider;
+    el('result').textContent=JSON.stringify(j,null,2);
+  }catch(e){el('status').textContent=e.message}
+}
+async function review(){
+ if(!current){el('status').textContent='ابتدا عکس را بارگذاری کنید';return}
+ try{
+  const fields=JSON.parse(el('fields').value);
+  const r=await fetch('/api/v1/claims/'+encodeURIComponent(el('claim').value.trim())+
+    '/documents/'+encodeURIComponent(current)+'/review',
+    {method:'POST',headers:{'Content-Type':'application/json','X-Document-Api-Key':el('key').value},
+     body:JSON.stringify({confirmed_fields:fields,approved:true})});
+  const j=await r.json();if(!r.ok)throw Error(JSON.stringify(j.detail));
+  el('status').textContent='اطلاعات بررسی‌شده در دیتابیس ذخیره شد';
+  el('result').textContent=JSON.stringify(j,null,2);
+ }catch(e){el('status').textContent=e.message}
+}
+</script></html>""")
