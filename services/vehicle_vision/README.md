@@ -44,3 +44,24 @@ Database URL: `VEHICLE_VISION_DATABASE_URL`, then `DATABASE_URL`; SQLite is the 
 Weights are external and are not committed. Set `VEHICLE_VISION_MODEL` to trained YOLO weights. Until then inference returns HTTP 503. Detections are decision support and require human review. Assessment totals only expert-entered prices; no Iranian market price is fabricated.
 
 Initial labels should cover vehicle parts (bumper, hood, doors, fender, lights, glass, mirror, wheel) and damage (scratch, dent, crack, broken_glass, deformation, missing_part). Version the annotation schema and evaluate per-class precision/recall and mAP before production.
+
+
+## Training the vision model
+
+Prepare a licensed, annotated YOLO dataset using [the dataset guide](../../data/vehicle_vision/README.md) and `data/vehicle_vision/damage_dataset.yaml`. Then run:
+
+```bash
+python -m services.vehicle_vision.scripts.train_vehicle_vision --epochs 100 --imgsz 960
+```
+
+The trainer selects MPS on Apple Silicon, otherwise CUDA or CPU, and exports `models/vehicle_vision/vehicle_damage_yolo.pt`.
+
+## Training the repair-cost baseline
+
+The repair-cost model is separate from the visual detector and from the fire/property model. It requires expert-approved Iranian invoice rows; the repository contains only a CSV header template, not fabricated training data.
+
+```bash
+python -m services.vehicle_vision.scripts.train_repair_cost --input /path/to/approved_repair_invoices.csv
+```
+
+The split is grouped by claim to reduce leakage. The artifact is saved to `models/vehicle_vision/vehicle_repair_cost.joblib`. Only deploy after reviewing held-out MAE/RMSE/R² and validating across vehicle makes, cities and repair types.
