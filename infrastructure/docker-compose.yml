@@ -176,6 +176,7 @@ services:
     environment:
       VEHICLE_VISION_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-damage}:${POSTGRES_PASSWORD:-damage_dev}@postgres:5432/${POSTGRES_DB:-damage_ai}
       VEHICLE_VISION_MODEL: /models/vehicle_damage_yolo.pt
+      VEHICLE_REPAIR_COST_MODEL: /models/vehicle_repair_cost.joblib
       VEHICLE_VISION_MEDIA_ROOT: /var/lib/vehicle-vision/media
       VEHICLE_VISION_MODEL_VERSION: ${VEHICLE_VISION_MODEL_VERSION:-untrained}
     ports:
