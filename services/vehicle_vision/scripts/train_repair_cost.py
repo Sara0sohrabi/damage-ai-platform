@@ -30,7 +30,7 @@ REQUIRED = ["claim_id", *FEATURES, "total_cost_irr"]
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", required=True, help="CSV of expert-approved repair invoices")
-    parser.add_argument("--output", default="models/vehicle_repair_cost.joblib")
+    parser.add_argument("--output", default="models/vehicle_vision/vehicle_repair_cost.joblib")
     parser.add_argument("--test-size", type=float, default=0.2)
     args = parser.parse_args()
 
