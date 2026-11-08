@@ -1,0 +1,7 @@
+FROM python:3.11-slim
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+COPY services/vehicle_vision/requirements.txt /tmp/requirements.txt
+RUN python -m pip install --upgrade pip && pip install --no-cache-dir -r /tmp/requirements.txt
+COPY services/vehicle_vision /app/services/vehicle_vision
+CMD ["uvicorn", "services.vehicle_vision.app.main:app", "--host", "0.0.0.0", "--port", "8010"]

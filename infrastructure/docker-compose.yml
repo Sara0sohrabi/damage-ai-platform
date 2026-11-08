@@ -161,9 +161,36 @@ services:
 
 
 # ============================================================
+# VEHICLE VISION API
+# ============================================================
+
+  vehicle_vision:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.vehicle_vision
+    container_name: damage_ai_vehicle_vision
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      VEHICLE_VISION_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-damage}:${POSTGRES_PASSWORD:-damage_dev}@postgres:5432/${POSTGRES_DB:-damage_ai}
+      VEHICLE_VISION_MODEL: /models/vehicle_damage_yolo.pt
+      VEHICLE_REPAIR_COST_MODEL: /models/vehicle_repair_cost.joblib
+      VEHICLE_VISION_MEDIA_ROOT: /var/lib/vehicle-vision/media
+      VEHICLE_VISION_MODEL_VERSION: ${VEHICLE_VISION_MODEL_VERSION:-untrained}
+    ports:
+      - "8010:8010"
+    volumes:
+      - ../models/vehicle_vision:/models:ro
+      - vehicle_vision_media:/var/lib/vehicle-vision/media
+
+
+# ============================================================
 # VOLUMES
 # ============================================================
 volumes:
+  vehicle_vision_media:
 
   # Volume قدیمی و اصلی دیتابیس Training
   infrastructure_damage_ai_pgdata:
